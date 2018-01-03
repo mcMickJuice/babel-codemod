@@ -47,6 +47,7 @@
     "babel-preset-env": "^1.6.1",
     "babel-register": "^6.26.0",
     "glob": "^7.1.2",
+    "got": "^8.0.1",
     "mz": "^2.7.0",
     "recast": "^0.13.0",
     "resolve": "^1.5.0"
