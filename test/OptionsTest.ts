@@ -43,7 +43,7 @@ describe('Options', function() {
     deepEqual(options.pluginOptions.get('my-plugin'), { foo: true });
   });
 
-  it('associates plugin options based on declared name', function() {
+  it('associates plugin options based on declared name', async function() {
     let options = assertOptionsParsed(Options.parse([
       '--plugin',
       './test/fixtures/plugin/index.js',
@@ -54,7 +54,7 @@ describe('Options', function() {
     // "basic-plugin" is declared in the plugin file
     deepEqual(options.pluginOptions.get('basic-plugin'), { a: true });
 
-    let babelPlugin = options.getBabelPlugin('basic-plugin');
+    let babelPlugin = await options.getBabelPlugin('basic-plugin');
 
     if (!Array.isArray(babelPlugin)) {
       throw new Error(`expected plugin to be [plugin, options] tuple: ${inspect(babelPlugin)}`);
@@ -68,7 +68,7 @@ describe('Options', function() {
     deepEqual(options.requires, ['mz'].map(require.resolve));
   });
 
-  it('associates plugin options based on inferred name', function() {
+  it('associates plugin options based on inferred name', async function() {
     let options = assertOptionsParsed(Options.parse([
       '--plugin',
       './test/fixtures/plugin/index.js',
@@ -79,7 +79,7 @@ describe('Options', function() {
     // "index" is the name of the file
     deepEqual(options.pluginOptions.get('index'), { a: true });
 
-    let babelPlugin = options.getBabelPlugin('index');
+    let babelPlugin = await options.getBabelPlugin('index');
 
     if (!Array.isArray(babelPlugin)) {
       throw new Error(`expected plugin to be [plugin, options] tuple: ${inspect(babelPlugin)}`);

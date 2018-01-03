@@ -55,7 +55,7 @@ export class DeferredPlugin {
     readonly inferredName: string,
   ) {}
 
-  load(): Plugin {
+  async load(): Promise<Plugin> {
     if (!this.loaded) {
       this.loaded = Plugin.load(this.path, this.inferredName);
     }
@@ -80,9 +80,9 @@ export default class Options {
 
   private _pluginCache?: Array<Plugin>;
 
-  getPlugins(): Array<Plugin> {
+  async getPlugins(): Promise<Array<Plugin>> {
     if (!this._pluginCache) {
-      this._pluginCache = this.plugins.map(plugin => plugin.load());
+      this._pluginCache = await Promise.all(this.plugins.map(plugin => plugin.load()));
     }
     return this._pluginCache;
   }
@@ -103,8 +103,8 @@ export default class Options {
     require('babel-register')(pluginOptions);
   }
 
-  getPlugin(name: string): Plugin | null {
-    for (let plugin of this.getPlugins()) {
+  async getPlugin(name: string): Promise<Plugin | null> {
+    for (let plugin of await this.getPlugins()) {
       if (plugin.declaredName === name || plugin.inferredName === name) {
         return plugin;
       }
@@ -113,10 +113,10 @@ export default class Options {
     return null;
   }
 
-  getBabelPlugins(): Array<BabelPlugin> {
+  async getBabelPlugins(): Promise<Array<BabelPlugin>> {
     let result: Array<BabelPlugin> = [];
 
-    for (let plugin of this.getPlugins()) {
+    for (let plugin of await this.getPlugins()) {
       let options = plugin.declaredName &&
         this.pluginOptions.get(plugin.declaredName) ||
         this.pluginOptions.get(plugin.inferredName);
@@ -131,8 +131,8 @@ export default class Options {
     return result;
   }
 
-  getBabelPlugin(name: string): BabelPlugin | null {
-    let plugin = this.getPlugin(name);
+  async getBabelPlugin(name: string): Promise<BabelPlugin | null> {
+    let plugin = await this.getPlugin(name);
 
     if (!plugin) {
       return null;

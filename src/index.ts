@@ -72,7 +72,7 @@ export default async function run(
 
   options.loadRequires();
 
-  let plugins = options.getBabelPlugins();
+  let plugins = await options.getBabelPlugins();
   let runner: TransformRunner;
   let stats = {
     modified: 0,
