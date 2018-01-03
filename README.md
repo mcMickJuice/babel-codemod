@@ -6,7 +6,7 @@ babel-codemod rewrites JavaScript using babel plugins.
 
 Install from yarn:
 
-```
+```sh
 $ yarn global add babel-codemod
 ```
 
@@ -18,13 +18,19 @@ This will install the runner as `codemod`. This package requires node v6 or high
 
 The primary interface is as a command line tool, usually run like so:
 
-```
+```sh
 $ codemod --plugin transform-module-name \
   path/to/file.js \
   another/file.js
 ```
 
 This will re-write the files `path/to/file.js` and `another/file.js` by transforming them with the babel plugin `transform-module-name`. Multiple plugins may be specified, and multiple file or directories may be re-written at once.
+
+Plugins may also be loaded from [AST Explorer](https://astexplorer.net/) using `--remote-plugin`. This feature should only be used as a convenience to load code that you or someone you trust wrote. It will run with your full user privileges, so please exercise caution!
+
+```sh
+$ codemod --remote-plugin URL …
+```
 
 For more detailed options, run `codemod --help`.
 
@@ -38,7 +44,7 @@ There are [many, many existing plugins](https://yarnpkg.com/en/packages?q=babel-
 
 This feature should support most use cases when writing plugins in advanced JavaScript syntax. However, if you are writing plugins with syntax that is beyond "latest", or you would like to use your own set of plugins and presets, you can pass in the `--find-babel-config` switch in combination with a local `.babelrc` file that lists the presets/plugins you want applied to your plugin code.
 
-```
+```sh
 # Run a local plugin that is passed through locally installed babel plugins
 $ codemod --find-babel-config --plugin ./my-plugin.js src/
 ```
@@ -50,7 +56,7 @@ There is currently an [open issue](https://github.com/square/babel-codemod/issue
 
 For example:
 
-```
+```sh
 # Run a local plugin written with TypeScript.
 $ codemod --require ts-node/register --plugin ./my-plugin.ts src/
 ```
