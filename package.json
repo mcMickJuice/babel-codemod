@@ -30,10 +30,12 @@
     "@types/babel-traverse": "^6.7.16",
     "@types/babylon": "^6.7.15",
     "@types/glob": "^5.0.30",
+    "@types/got": "^7.1.6",
     "@types/mocha": "^2.2.45",
     "@types/mz": "0.0.32",
     "@types/node": "^8.0.0",
     "@types/rimraf": "2.0.2",
+    "@types/tmp": "^0.0.33",
     "commitlint": "^5.2.8",
     "husky": "^0.14.3",
     "mocha": "^4.1.0",
@@ -50,7 +52,8 @@
     "got": "^8.0.1",
     "mz": "^2.7.0",
     "recast": "^0.13.0",
-    "resolve": "^1.5.0"
+    "resolve": "^1.5.0",
+    "tmp": "^0.0.33"
   },
   "engines": {
     "node": ">=6.0.0"

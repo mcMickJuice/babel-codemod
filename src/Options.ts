@@ -4,6 +4,10 @@ import { hasMagic as hasGlob, sync as globSync } from 'glob';
 import { basename, extname, resolve } from 'path';
 import { sync as resolveSync } from 'resolve';
 import { PathPredicate } from './iterateSources';
+import PluginLoader from './PluginLoader';
+import AstExplorerResolver from './resolvers/AstExplorerResolver';
+import FileSystemResolver from './resolvers/FileSystemResolver';
+import NetworkResolver from './resolvers/NetworkResolver';
 import { BabelPlugin, RawBabelPlugin } from './TransformRunner';
 
 export const DEFAULT_EXTENSIONS = new Set(['.js', '.jsx']);
@@ -25,7 +29,7 @@ export class Plugin {
     }
   }
 
-  static load(path: string, inferredName: string) {
+  static load(path: string, inferredName: string): Plugin {
     let resolvedPath = require.resolve(path);
     let exports = require(path);
     let plugin;
@@ -66,7 +70,7 @@ export class DeferredPlugin {
 export default class Options {
   constructor(
     readonly sourcePaths: Array<string>,
-    readonly plugins: Array<DeferredPlugin>,
+    readonly plugins: Array<string>,
     readonly pluginOptions: Map<string, object>,
     readonly extensions: Set<string>,
     readonly requires: Array<string>,
@@ -78,11 +82,27 @@ export default class Options {
     readonly dry: boolean
   ) {}
 
+  private pluginLoader = new PluginLoader([
+    new AstExplorerResolver(),
+    new NetworkResolver(),
+    new FileSystemResolver()
+  ]);
+
   private _pluginCache?: Array<Plugin>;
 
   async getPlugins(): Promise<Array<Plugin>> {
     if (!this._pluginCache) {
-      this._pluginCache = await Promise.all(this.plugins.map(plugin => plugin.load()));
+      this._pluginCache = await Promise.all(
+        this.plugins.map(async plugin => {
+          let pluginExports = await this.pluginLoader.load(plugin);
+          let defaultExport = pluginExports['default'] || pluginExports;
+
+          return new Plugin(
+            defaultExport,
+            basename(plugin, extname(plugin))
+          );
+        })
+      );
     }
     return this._pluginCache;
   }
@@ -149,7 +169,7 @@ export default class Options {
 
   static parse(args: Array<string>): ParseOptionsResult {
     let sourcePaths: Array<string> = [];
-    let plugins: Array<DeferredPlugin> = [];
+    let plugins: Array<string> = [];
     let pluginOptions: Map<string, object> = new Map();
     let extensions = DEFAULT_EXTENSIONS;
     let ignore = (path: string, basename: string, root: string) => basename[0] === '.';
@@ -167,11 +187,7 @@ export default class Options {
         case '-p':
         case '--plugin':
           i++;
-          let path = args[i];
-          plugins.push(new DeferredPlugin(
-            getRequirableModulePath(path),
-            basename(path, extname(path))
-          ));
+          plugins.push(args[i]);
           break;
 
         case '-o':
